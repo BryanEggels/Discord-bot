@@ -3,4 +3,4 @@ Mivo's bot
 
 
 
-Credits to Hugo22O for the Hello <username> function!
+Credits to Hugo22O for the Hello *username* function!
