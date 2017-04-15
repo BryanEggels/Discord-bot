@@ -32,7 +32,7 @@ namespace Mivos_Bot
                     DiscordBranch = Branch.Stable,
                     LargeThreshold = 250,
                     LogLevel = LogLevel.Unnecessary,
-                    Token = "MzAyNDY2NjMyNzU4ODUzNjMz.C9KBYw.U1WAh0JC2zEzOdXDidL9nRgGqbE",
+                    Token = "api key here",
                     TokenType = TokenType.Bot,
                     UseInternalLogHandler = false
                 });
