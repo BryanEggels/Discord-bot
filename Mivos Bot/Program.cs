@@ -67,7 +67,54 @@ namespace Mivos_Bot
             });
             p_discord.AddCommand("hello", async e =>
             {
-                await e.Message.Respond($"Hello, {e.Message.Author.Mention}!");
+                string[] msg = e.Message.Content.Split(' ');
+                
+                //if msg array contains more then 1 arrayobject then..
+                if(msg.Length > 1 && msg[1].Length >= 3)
+
+                {
+                    bool ChannelContainsUser = false;
+                    List<DiscordUser> members = new List<DiscordUser>();
+                    //check if member is in the current 'guild'
+                    foreach (DiscordMember dm in e.Guild.Members)
+                    {
+                        
+                        if (dm.User.Username.ToUpper().Contains(msg[1].ToUpper()))
+                        {
+                            if (dm.User.Username.ToUpper() == msg[1].ToUpper())
+                            {
+                                ChannelContainsUser = true;
+                                await e.Message.Respond($"{e.Message.Author.Username } says hello to <@{dm.User.ID}> ");
+                                break;
+                            }
+                            members.Add(dm.User);
+                        }
+                        if(members.Count > 1 && !ChannelContainsUser)
+                        {
+                            await e.Message.Respond($"more then 1 user with those characters in his name");
+                            ChannelContainsUser = true;
+                            break;
+                        }
+                        else if (members.Count == 1)
+                        {
+                            ChannelContainsUser = true;
+                            await e.Message.Respond($"{e.Message.Author.Username } says hello to <@{members[0].ID}> ");
+                            break;
+                        }
+                        
+                    }
+                    if (!ChannelContainsUser)
+                    {
+                        await e.Message.Respond("That user is not in the current channel");
+                    }
+                      
+                }
+                else
+                {
+                    await e.Message.Respond($"Hello, {e.Message.Author.Mention}!");
+                }
+                
+
             });
             p_discord.AddCommand("reken", async e =>
             {
@@ -151,7 +198,8 @@ namespace Mivos_Bot
                 DiscordGuild guild = await p_discord.GetGuild(e.Channel.GuildID);
                 
                 VoiceService.GetConnection(guild).Disconnect();
-                
+                VoiceService.GetConnection(guild).Dispose();
+
                 }
                 catch(Exception exc)
                 {
@@ -198,7 +246,7 @@ namespace Mivos_Bot
                     var bytes = new byte[32000];
                     rand.NextBytes(bytes);
             
-                    await VoiceService.GetConnection(guild).SendAsync(bytes,517);
+                    await VoiceService.GetConnection(guild).SendAsync(bytes,517,16);
                     Console.Write("i just played something!");
                 } 
                 catch (Exception exc)
