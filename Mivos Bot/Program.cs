@@ -148,10 +148,10 @@ namespace Mivos_Bot
             {
                 try
                 {
-                    DiscordGuild guild = await p_discord.GetGuild(e.Channel.GuildID);
-
-                    VoiceService.GetConnection(guild).Disconnect();
-                    
+                DiscordGuild guild = await p_discord.GetGuild(e.Channel.GuildID);
+                
+                VoiceService.GetConnection(guild).Disconnect();
+                
                 }
                 catch(Exception exc)
                 {
@@ -197,7 +197,7 @@ namespace Mivos_Bot
                     var rand = new Random();
                     var bytes = new byte[32000];
                     rand.NextBytes(bytes);
-
+            
                     await VoiceService.GetConnection(guild).SendAsync(bytes,517);
                     Console.Write("i just played something!");
                 } 
