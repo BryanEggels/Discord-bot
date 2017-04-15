@@ -78,7 +78,7 @@ namespace Mivos_Bot
                     //check if member is in the current 'guild'
                     foreach (DiscordMember dm in e.Guild.Members)
                     {
-                        
+                        //check if msg[1] containst a part of the user
                         if (dm.User.Username.ToUpper().Contains(msg[1].ToUpper()))
                         {
                             if (dm.User.Username.ToUpper() == msg[1].ToUpper())
@@ -95,15 +95,15 @@ namespace Mivos_Bot
                             ChannelContainsUser = true;
                             break;
                         }
-                        else if (members.Count == 1)
-                        {
-                            ChannelContainsUser = true;
-                            await e.Message.Respond($"{e.Message.Author.Username } says hello to <@{members[0].ID}> ");
-                            break;
-                        }
+    
+                    }
+                    if (members.Count == 1)
+                    {
+                        ChannelContainsUser = true;
+                        await e.Message.Respond($"{e.Message.Author.Username } says hello to <@{members[0].ID}> ");
                         
                     }
-                    if (!ChannelContainsUser)
+                    else if (!ChannelContainsUser)
                     {
                         await e.Message.Respond("That user is not in the current channel");
                     }
@@ -170,7 +170,6 @@ namespace Mivos_Bot
                 }
  
             });
-
             p_discord.AddCommand("join", async e =>
             {
                 try
@@ -226,7 +225,7 @@ namespace Mivos_Bot
             });
             p_discord.AddCommand("help", async e =>
             {
-                await e.Message.Respond("currently available commands are: \n#hello \n#reken 'nummer' 'operator' 'nummer' \n#god to see if you are a c# god ");
+                await e.Message.Respond("currently available commands are: \n#hello <username> \n#reken 'nummer' 'operator' 'nummer' \n#god to see if you are a c# god ");
 
             });
             p_discord.AddCommand("666", async e =>
