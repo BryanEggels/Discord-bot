@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using DSharpPlus.Commands;
 using DSharpPlus.VoiceNext;
+using System.IO;
 
 
 
@@ -32,7 +33,8 @@ namespace Mivos_Bot
                     DiscordBranch = Branch.Stable,
                     LargeThreshold = 250,
                     LogLevel = LogLevel.Unnecessary,
-                    Token = "MzAyNDY2NjMyNzU4ODUzNjMz.C9KBYw.U1WAh0JC2zEzOdXDidL9nRgGqbE",
+                    Token = File.ReadAllText("token.txt"),
+                
                     TokenType = TokenType.Bot,
                     UseInternalLogHandler = false
                 });
@@ -133,32 +135,29 @@ namespace Mivos_Bot
                     };
                     VoiceService = p_discord.UseVoiceNext(vcfg);
 
-                    await VoiceService.ConnectAsync(await p_discord.GetChannelByID(272324064495009792));
+                    await VoiceService.ConnectAsync(await p_discord.GetChannelByID(272324215439491072));
+                    Console.WriteLine("Joined voice channel");
                 }
                 catch(Exception exc)
                 {
                     Console.WriteLine(exc.Message);
                 }
                 
-                
             });
             p_discord.AddCommand("dc", async e =>
             {
-                
-                
-                
-                DiscordGuild guild = await p_discord.GetGuild(e.Channel.GuildID);
-                
-                VoiceService.GetConnection(guild).Disconnect();
-                
-                Console.Write(guild.Name);
-                
-                
+                try
+                {
+                    DiscordGuild guild = await p_discord.GetGuild(e.Channel.GuildID);
 
+                    VoiceService.GetConnection(guild).Disconnect();
+                    
+                }
+                catch(Exception exc)
+                {
+                    Console.WriteLine(exc.Message);
+                }
             });
-
-
-
             p_discord.AddCommand("god", async e =>
             {
                 if(e.Message.Author.ID == 261216517910167554)
@@ -190,7 +189,23 @@ namespace Mivos_Bot
             {
                 await e.Message.Respond("BLACK HAS NO POWER, RIGHT " + e.Message.Author.Username + "?");
             });
-            
+            p_discord.AddCommand("play", async e =>
+            {
+                try
+                {
+                    DiscordGuild guild = await p_discord.GetGuild(e.Channel.GuildID);
+                    var rand = new Random();
+                    var bytes = new byte[32000];
+                    rand.NextBytes(bytes);
+
+                    await VoiceService.GetConnection(guild).SendAsync(bytes,517);
+                    Console.Write("i just played something!");
+                } 
+                catch (Exception exc)
+                {
+                    Console.WriteLine(exc.Message);
+                }
+            });
 
         }
         public static Boolean Operator(string logic, double x, double y)
