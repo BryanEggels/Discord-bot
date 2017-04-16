@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DSharpPlus;
+using Mivos_Bot.Models;
 
 namespace Mivos_Bot.Context.IContext
 {
@@ -11,7 +12,8 @@ namespace Mivos_Bot.Context.IContext
     {
         bool MuteUser(DiscordUser user);
         bool AddUser(DiscordUser user);
-        bool SelectUser(DiscordUser user);
-        List<ulong> GetMuted();
+        bool User_exists(DiscordUser user);
+        List<User> GetMuted();
+        User GetUser(ulong uid);
     }
 }

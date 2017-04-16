@@ -8,8 +8,8 @@ using DSharpPlus.Commands;
 using DSharpPlus.VoiceNext;
 using System.IO;
 using Mivos_Bot.Context;
-using Mivos_Bot.Context.IContext;
 using Mivos_Bot.Repository;
+using Mivos_Bot.Models;
 
 
 namespace Mivos_Bot
@@ -28,7 +28,8 @@ namespace Mivos_Bot
         }
         public static async Task Run()
         {
-            MessageRepository repo = new MessageRepository(new MessageSQLContext());
+            MessageRepository messagerepo = new MessageRepository(new MessageSQLContext());
+            UserRepository userrepo = new UserRepository(new UserSQLContext());
             try
             {
                 var discord = new DiscordClient(new DiscordConfig
@@ -49,14 +50,18 @@ namespace Mivos_Bot
 
                 discord.MessageCreated += async (e) => //triggered when a new message comes in
                 {
-                    if (new UserRepository(new UserSQLContext()).GetMuted().Contains(e.Message.Author.ID))
+                    
+                    if (userrepo.GetMuted().Any(User => User.uid == e.Author.ID))
                     {
                         await e.Message.Delete();
+
                     }
 
-                    if (repo.CheckDuplicate(e.Message, e.Guild.ID))
+                    else if (messagerepo.CheckDuplicate(e.Message, e.Guild.ID))
                     {
-                        new UserRepository(new UserSQLContext()).MuteUser(e.Message.Author);
+                        userrepo.MuteUser(e.Message.Author);
+                        User muteduser = userrepo.GetUser(e.Author.ID);
+                        await e.Message.Respond($"{e.Message.Author.Username} has been muted untill {muteduser.Mute_Expired}, this is mute number {muteduser.Mutecount}!");
                         await e.Message.Delete();
                     }
                     

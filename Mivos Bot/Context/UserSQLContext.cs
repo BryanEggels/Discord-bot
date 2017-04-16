@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DSharpPlus;
 using Mivos_Bot.Context.IContext;
 using System.Data.SqlClient;
+using Mivos_Bot.Models;
 
 namespace Mivos_Bot.Context
 {
@@ -37,30 +38,71 @@ namespace Mivos_Bot.Context
             return false;
         }
 
-        public List<ulong> GetMuted()
+        public List<User> GetMuted()
         {
             using (SqlConnection con = Database.Connection)
             {
-                string checkmsg = "SELECT UID FROM discorduser WHERE Mute_Expired > current_timestamp";
+                string checkmsg = "SELECT UID,Mute_Expired,MuteCount FROM discorduser WHERE Mute_Expired > current_timestamp";
                 SqlCommand cmd = new SqlCommand(checkmsg, con);
 
                 try
                 {
                     SqlDataReader reader = cmd.ExecuteReader();
-                    List<ulong> muteduserids = new List<ulong>();
+                    List<User> mutedusers = new List<User>();
                     while (reader.Read())
                     {
-                        muteduserids.Add(Convert.ToUInt64(reader[0]));
+                        mutedusers.Add(new User
+                        {
+                            uid = Convert.ToUInt64(reader[0]),
+                            Mute_Expired = Convert.ToDateTime(reader[1]),
+                            Mutecount = Convert.ToInt32(reader[2])
+                        });
                     }
-                    return muteduserids;
+                    return mutedusers;
                 }
                 catch (SqlException e)
                 {
                     Console.WriteLine(e.Message);
-                    return new List<ulong>();
+                    return new List<User>();
                 }
             }
         }
+
+        public User GetUser(ulong uid)
+        {
+            using (SqlConnection con = Database.Connection)
+            {
+                string checkmsg = "SELECT * FROM discorduser WHERE UID = @uid";
+                SqlCommand cmd = new SqlCommand(checkmsg, con);
+
+                cmd.Parameters.AddWithValue("@uid", uid.ToString());
+                try
+                {
+                    SqlDataReader reader = cmd.ExecuteReader();
+
+                    if (reader.Read())
+                    {
+                        return new User
+                        {
+                            uid = Convert.ToUInt64(reader["uid"]),
+                            Mutecount = Convert.ToInt32(reader["MuteCount"]),
+                            Mute_Expired = Convert.ToDateTime(reader["Mute_Expired"]),
+                            username = reader["Username"].ToString()
+                        };
+                    }
+                    else
+                    {
+                        return new User();
+                    }
+                }
+                catch (SqlException e)
+                {
+                    Console.WriteLine(e.Message);
+                    return new User();
+                }
+            }
+        }
+    
 
         public bool MuteUser(DiscordUser User)
         {
@@ -86,7 +128,7 @@ namespace Mivos_Bot.Context
             }
             return false;
         }
-        public bool SelectUser(DiscordUser user)
+        public bool User_exists(DiscordUser user)
         {
             using (SqlConnection con = Database.Connection)
             {

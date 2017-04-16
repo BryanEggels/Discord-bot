@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DSharpPlus;
 using Mivos_Bot.Context.IContext;
+using Mivos_Bot.Models;
 
 namespace Mivos_Bot.Repository
 {
@@ -20,18 +21,23 @@ namespace Mivos_Bot.Repository
             return context.AddUser(user);
         }
 
-        public List<ulong> GetMuted()
+        public List<User> GetMuted()
         {
             return context.GetMuted();
+        }
+
+        public User GetUser(ulong uid)
+        {
+            return context.GetUser(uid);
         }
 
         public bool MuteUser(DiscordUser user)
         {
             return context.MuteUser(user);
         }
-        public bool SelectUser(DiscordUser user)
+        public bool User_exists(DiscordUser user)
         {
-            return context.SelectUser(user);
+            return context.User_exists(user);
         }
     }
 }

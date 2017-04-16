@@ -9,6 +9,7 @@ using System.Data.SqlClient;
 using Mivos_Bot.Context;
 using Mivos_Bot.Repository;
 
+
 namespace Mivos_Bot.Context
 {
     class MessageSQLContext : IMessageContext
@@ -19,7 +20,7 @@ namespace Mivos_Bot.Context
             {
                 using (SqlConnection con = Database.Connection)
                 {
-                    if (!new UserRepository(new UserSQLContext()).SelectUser(msg.Author)) //if msgAuthor isnt already in our database, then add it
+                    if (!new UserRepository(new UserSQLContext()).User_exists(msg.Author)) //if msgAuthor isnt already in our database, then add it
                     {
                         new UserRepository(new UserSQLContext()).AddUser(msg.Author);
                     }
@@ -49,6 +50,7 @@ namespace Mivos_Bot.Context
         {
             using (SqlConnection con = Database.Connection)
             {
+                
                 string checkmsg = "SELECT * FROM discordmessage WHERE MessageHash = @msghash AND GuildID = @gid";
                 SqlCommand cmd = new SqlCommand(checkmsg, con);
 
