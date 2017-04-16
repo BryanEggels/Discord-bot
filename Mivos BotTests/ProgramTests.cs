@@ -15,7 +15,7 @@ namespace Mivos_Bot.Tests
         public void AddKarmaTest()
         {
             Program program = new Program();
-            program.AddKarma(261216517910167554);
+            //program.AddKarma(261216517910167554);
         }
     }
 }

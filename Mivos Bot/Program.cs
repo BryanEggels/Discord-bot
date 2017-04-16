@@ -7,7 +7,9 @@ using DSharpPlus;
 using DSharpPlus.Commands;
 using DSharpPlus.VoiceNext;
 using System.IO;
-
+using Mivos_Bot.Context;
+using Mivos_Bot.Context.IContext;
+using Mivos_Bot.Repository;
 
 
 namespace Mivos_Bot
@@ -19,12 +21,14 @@ namespace Mivos_Bot
 
         static void Main(string[] args)
         {
+            
             Run();
             Console.ReadLine();
 
         }
         public static async Task Run()
         {
+            MessageRepository repo = new MessageRepository(new MessageSQLContext());
             try
             {
                 var discord = new DiscordClient(new DiscordConfig
@@ -34,7 +38,6 @@ namespace Mivos_Bot
                     LargeThreshold = 250,
                     LogLevel = LogLevel.Unnecessary,
                     Token = File.ReadAllText("token.txt"),
-                
                     TokenType = TokenType.Bot,
                     UseInternalLogHandler = false
                 });
@@ -44,16 +47,30 @@ namespace Mivos_Bot
                     Console.WriteLine($"[{e.TimeStamp}] [{e.Application}] [{e.Level}] {e.Message}");
                 };
 
+                discord.MessageCreated += async (e) => //triggered when a new message comes in
+                {
+                    if (new UserRepository(new UserSQLContext()).GetMuted().Contains(e.Message.Author.ID))
+                    {
+                        await e.Message.Delete();
+                    }
 
+                    if (repo.CheckDuplicate(e.Message, e.Guild.ID))
+                    {
+                        new UserRepository(new UserSQLContext()).MuteUser(e.Message.Author);
+                        await e.Message.Delete();
+                    }
+                    
+                    await Task.Delay(0);
+                    
+                };
                 addcommands(discord);
-                
+
                 await discord.Connect();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine(e.Message);
             }
-            
 
             await Task.Delay(-1);
         }
@@ -67,9 +84,9 @@ namespace Mivos_Bot
             p_discord.AddCommand("hello", async e =>
             {
                 string[] msg = e.Message.Content.Split(' ');
-                
+
                 //if msg array contains more then 1 arrayobject then..
-                if(msg.Length > 1 && msg[1].Length >= 3)
+                if (msg.Length > 1 && msg[1].Length >= 3)
 
                 {
                     bool ChannelContainsUser = false;
@@ -82,37 +99,38 @@ namespace Mivos_Bot
                         {
                             if (dm.User.Username.ToUpper() == msg[1].ToUpper())
                             {
+
                                 ChannelContainsUser = true;
                                 await e.Message.Respond($"{e.Message.Author.Username } says hello to <@{dm.User.ID}> ");
                                 break;
                             }
                             members.Add(dm.User);
                         }
-                        if(members.Count > 1 && !ChannelContainsUser)
+                        if (members.Count > 1 && !ChannelContainsUser)
                         {
                             await e.Message.Respond($"more then 1 user with those characters in his name");
                             ChannelContainsUser = true;
                             break;
                         }
-    
+
                     }
                     if (members.Count == 1)
                     {
                         ChannelContainsUser = true;
                         await e.Message.Respond($"{e.Message.Author.Username } says hello to <@{members[0].ID}> ");
-                        
+
                     }
                     else if (!ChannelContainsUser)
                     {
                         await e.Message.Respond("That user is not in the current channel");
                     }
-                      
+
                 }
                 else
                 {
                     await e.Message.Respond($"Hello, {e.Message.Author.Mention}!");
                 }
-                
+
 
             });
             p_discord.AddCommand("reken", async e =>
@@ -167,7 +185,7 @@ namespace Mivos_Bot
                 {
                     await e.Message.Respond(exc.Message);
                 }
- 
+
             });
             p_discord.AddCommand("join", async e =>
             {
@@ -183,39 +201,39 @@ namespace Mivos_Bot
                     await VoiceService.ConnectAsync(await p_discord.GetChannelByID(272324215439491072));
                     Console.WriteLine("Joined voice channel");
                 }
-                catch(Exception exc)
+                catch (Exception exc)
                 {
                     Console.WriteLine(exc.Message);
                 }
-                
+
             });
             p_discord.AddCommand("dc", async e =>
             {
                 try
                 {
-                DiscordGuild guild = await p_discord.GetGuild(e.Channel.GuildID);
-                
-                VoiceService.GetConnection(guild).Disconnect();
-                VoiceService.GetConnection(guild).Dispose();
+                    DiscordGuild guild = await p_discord.GetGuild(e.Channel.GuildID);
+
+                    VoiceService.GetConnection(guild).Disconnect();
+                    VoiceService.GetConnection(guild).Dispose();
 
                 }
-                catch(Exception exc)
+                catch (Exception exc)
                 {
                     Console.WriteLine(exc.Message);
                 }
             });
             p_discord.AddCommand("god", async e =>
             {
-                if(e.Message.Author.ID == 261216517910167554)
+                if (e.Message.Author.ID == 261216517910167554)
                 {
-                    await e.Message.Respond("AND THE REAL C#GOD IS....\n"+e.Message.Author.Username);
-                    
+                    await e.Message.Respond("AND THE REAL C#GOD IS....\n" + e.Message.Author.Username);
+
                 }
                 else
                 {
                     await e.Message.Respond("you're not teh real c#god.");
                 }
-                
+
 
             });
             p_discord.AddCommand("kkk", async e =>
@@ -224,7 +242,8 @@ namespace Mivos_Bot
             });
             p_discord.AddCommand("help", async e =>
             {
-                await e.Message.Respond("currently available commands are: \n#hello <username> \n#reken 'nummer' 'operator' 'nummer' \n#god to see if you are a c# god ");
+                string prefix = "!";
+                await e.Message.Respond($"currently available commands are: \n{prefix}hello <username> \n{prefix}reken 'nummer' 'operator' 'nummer' \n{prefix}god to see if you are a c# god\n{prefix}karma @username to give a user karma!\n ");
 
             });
             p_discord.AddCommand("666", async e =>
@@ -243,10 +262,10 @@ namespace Mivos_Bot
                     var rand = new Random();
                     var bytes = new byte[32000];
                     rand.NextBytes(bytes);
-            
-                    await VoiceService.GetConnection(guild).SendAsync(bytes,517,16);
+
+                    await VoiceService.GetConnection(guild).SendAsync(bytes, 517, 16);
                     Console.Write("i just played something!");
-                } 
+                }
                 catch (Exception exc)
                 {
                     Console.WriteLine(exc.Message);
@@ -256,9 +275,9 @@ namespace Mivos_Bot
             {
                 string[] msg = e.Message.Content.Split(' ');
                 List<DiscordUser> users = e.Message.Mentions;
-                if(users.Count == 1)
+                if (users.Count == 1)
                 {
-                    if(users[0].ID != e.Message.Author.ID)
+                    if (users[0].ID != e.Message.Author.ID)
                     {
                         int karma = AddKarma(users[0].ID);
                         await e.Message.Respond($"{users[0].Username} gained 1 karma!\n{users[0].Username} now has {karma} karma");
@@ -266,9 +285,9 @@ namespace Mivos_Bot
                     else {
                         await e.Message.Respond($"You just lost 1 karma");
                     }
-                    
+
                 }
-                else if(users.Count > 1)
+                else if (users.Count > 1)
                 {
                     await e.Message.Respond($"Please only mention 1 user :)");
                 }
@@ -276,9 +295,29 @@ namespace Mivos_Bot
                 {
                     await e.Message.Respond($"You have to at least mention 1 user");
                 }
-                
-            });
 
+            });
+            p_discord.AddCommand("dice", async e =>
+            {
+                string[] msg = e.Message.Content.Split(' ');
+                if (msg.Length > 1)
+                {
+                    int random = Dice(Convert.ToInt32(msg[1]), Convert.ToInt32(msg[2]));
+                    await e.Message.Respond(random.ToString());
+
+                }
+                else if (msg.Length == 1)
+                {
+                    int random = Dice(1, 101);
+                    await e.Message.Respond(random.ToString());
+                }
+                else
+                {
+
+                    await e.Message.Respond("Please use 2 parameters divided by a space");
+                }
+
+            });
         }
         public static Boolean Operator(string logic, double x, double y)
         {
@@ -288,12 +327,10 @@ namespace Mivos_Bot
                 case "<": return x < y;
                 case "==": return x == y;
                 case "!=": return x != y;
-                
+
                 default: throw new Exception("invalid logic");
             }
         }
-        
-
         public static int AddKarma(ulong userid)
         {
             List<string> karmalist = new List<string>();
@@ -302,7 +339,7 @@ namespace Mivos_Bot
             bool alreadyExists = false;
             string readline = null;
             int lineNumber = 0;
-            while((readline = sr.ReadLine())!= null){
+            while ((readline = sr.ReadLine()) != null) {
                 karmalist.Add(readline);
                 ++lineNumber;
             }
@@ -327,12 +364,8 @@ namespace Mivos_Bot
                 sw.Close();
                 return 1;
             }
-            
+
             return 0; //0 represents that there went something wrong
-        }
-        public bool GetKarma(long userid)
-        {
-            return true;
         }
         static void lineChanger(string newText, string fileName, int line_to_edit)
         {
@@ -340,5 +373,14 @@ namespace Mivos_Bot
             arrLine[line_to_edit - 1] = newText;
             File.WriteAllLines(fileName, arrLine);
         }
+        public static int Dice(int from, int to)
+        {
+            Random r = new Random();
+            return r.Next(from, to + 1);
+        }
+
+        
     }
+
 }
+
