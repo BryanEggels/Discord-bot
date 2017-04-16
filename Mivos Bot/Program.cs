@@ -12,7 +12,7 @@ using System.IO;
 
 namespace Mivos_Bot
 {
-    class Program
+    public class Program
     {
         private static VoiceNextClient VoiceService { get; set; }
 
@@ -59,10 +59,9 @@ namespace Mivos_Bot
         }
         public static void addcommands(DiscordClient p_discord)
         {
-
             p_discord.UseCommands(new CommandConfig
             {
-                Prefix = "#",
+                Prefix = "!",
                 SelfBot = false,
             });
             p_discord.AddCommand("hello", async e =>
@@ -253,6 +252,32 @@ namespace Mivos_Bot
                     Console.WriteLine(exc.Message);
                 }
             });
+            p_discord.AddCommand("karma", async e =>
+            {
+                string[] msg = e.Message.Content.Split(' ');
+                List<DiscordUser> users = e.Message.Mentions;
+                if(users.Count == 1)
+                {
+                    if(users[0].ID != e.Message.Author.ID)
+                    {
+                        int karma = AddKarma(users[0].ID);
+                        await e.Message.Respond($"{users[0].Username} gained 1 karma!\n{users[0].Username} now has {karma} karma");
+                    }
+                    else {
+                        await e.Message.Respond($"You just lost 1 karma");
+                    }
+                    
+                }
+                else if(users.Count > 1)
+                {
+                    await e.Message.Respond($"Please only mention 1 user :)");
+                }
+                else
+                {
+                    await e.Message.Respond($"You have to at least mention 1 user");
+                }
+                
+            });
 
         }
         public static Boolean Operator(string logic, double x, double y)
@@ -267,8 +292,53 @@ namespace Mivos_Bot
                 default: throw new Exception("invalid logic");
             }
         }
+        
 
-
-
+        public static int AddKarma(ulong userid)
+        {
+            List<string> karmalist = new List<string>();
+            string[] karmaline = null;
+            StreamReader sr = new StreamReader("Karma.txt");
+            bool alreadyExists = false;
+            string readline = null;
+            int lineNumber = 0;
+            while((readline = sr.ReadLine())!= null){
+                karmalist.Add(readline);
+                ++lineNumber;
+            }
+            sr.Close();
+            sr.Dispose();
+            foreach (string line in karmalist)
+            {
+                if (line.Contains(userid.ToString()))
+                {
+                    karmaline = line.Split(':');
+                    alreadyExists = true;
+                    int karma = Convert.ToInt32(karmaline[1]) + 1;
+                    karmaline[1] = karma.ToString();
+                    lineChanger(userid.ToString() + ":" + karmaline[1], "Karma.txt", lineNumber);
+                    return karma;
+                }
+            }
+            if (!alreadyExists)
+            {
+                StreamWriter sw = new StreamWriter("Karma.txt", true);
+                sw.WriteLine(userid.ToString() + ":" + "1");
+                sw.Close();
+                return 1;
+            }
+            
+            return 0; //0 represents that there went something wrong
+        }
+        public bool GetKarma(long userid)
+        {
+            return true;
+        }
+        static void lineChanger(string newText, string fileName, int line_to_edit)
+        {
+            string[] arrLine = File.ReadAllLines(fileName);
+            arrLine[line_to_edit - 1] = newText;
+            File.WriteAllLines(fileName, arrLine);
+        }
     }
 }
