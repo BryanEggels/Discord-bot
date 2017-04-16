@@ -50,23 +50,23 @@ namespace Mivos_Bot
 
                 discord.MessageCreated += async (e) => //triggered when a new message comes in
                 {
-                    
-                    if (userrepo.GetMuted().Any(User => User.uid == e.Author.ID))
+                    if (!e.Message.Author.IsBot) //filter the bots
                     {
-                        await e.Message.Delete();
+                        if (userrepo.GetMuted().Any(User => User.uid == e.Author.ID)) //see if the messageauthor is currently muted
+                        {
+                            await e.Message.Delete();
 
+                        }
+                        else if (messagerepo.CheckDuplicate(e.Message, e.Guild.ID) && !e.Message.Author.IsBot) //check if the message is a duplicate
+                        {
+                            userrepo.MuteUser(e.Message.Author);
+                            User muteduser = userrepo.GetUser(e.Author.ID);
+                            await e.Message.Respond($"{e.Message.Author.Username} has been muted untill {muteduser.Mute_Expired}, this is mute number {muteduser.Mutecount}!");
+                            await e.Message.Delete();
+                        }
+                        await Task.Delay(0);
                     }
-
-                    else if (messagerepo.CheckDuplicate(e.Message, e.Guild.ID))
-                    {
-                        userrepo.MuteUser(e.Message.Author);
-                        User muteduser = userrepo.GetUser(e.Author.ID);
-                        await e.Message.Respond($"{e.Message.Author.Username} has been muted untill {muteduser.Mute_Expired}, this is mute number {muteduser.Mutecount}!");
-                        await e.Message.Delete();
-                    }
-                    
-                    await Task.Delay(0);
-                    
+                   
                 };
                 addcommands(discord);
 
