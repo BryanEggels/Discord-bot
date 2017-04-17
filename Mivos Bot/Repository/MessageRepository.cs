@@ -11,6 +11,7 @@ namespace Mivos_Bot.Repository
     class MessageRepository : IMessageContext
     {
         IMessageContext context;
+        //made an interface 'context' so i can switch to any other context with those specified methods.
         public MessageRepository(IMessageContext context)
         {
             this.context = context;

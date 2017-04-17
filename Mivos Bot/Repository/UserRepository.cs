@@ -12,6 +12,8 @@ namespace Mivos_Bot.Repository
     class UserRepository : IUserContext
     {
         IUserContext context;
+
+        //made an interface 'context' so i can switch to any other context with those specified methods.
         public UserRepository(IUserContext context)
         {
             this.context = context;
