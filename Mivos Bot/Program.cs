@@ -44,6 +44,7 @@ namespace Mivos_Bot
                     UseInternalLogHandler = false
                 });
 
+                
                 discord.DebugLogger.LogMessageReceived += (o, e) =>
                 {
                     Console.WriteLine($"[{e.TimeStamp}] [{e.Application}] [{e.Level}] {e.Message}");
@@ -69,6 +70,8 @@ namespace Mivos_Bot
                     }
                    
                 };
+                
+
                 discord.PresenceUpdate += async (e) => //still testing
                 {
                     
@@ -81,6 +84,7 @@ namespace Mivos_Bot
                 addcommands(discord);
 
                 await discord.Connect();
+                await discord.UpdateStatus("Met de banhamer", -1);
             }
             catch (Exception e)
             {
@@ -91,6 +95,7 @@ namespace Mivos_Bot
         }
         public static void addcommands(DiscordClient p_discord)
         {
+            
             p_discord.UseCommands(new CommandConfig
             {
                 Prefix = "!",
@@ -261,7 +266,9 @@ namespace Mivos_Bot
             {
                 string prefix = "!";
                 await e.Message.Respond($"currently available commands are: \n{prefix}hello <username> \n{prefix}reken 'nummer' 'operator' 'nummer' \n{prefix}god to see if you are a c# god\n{prefix}karma @username to give a user karma!\n"+
-                    $"{prefix}dice 'minimumnumber' 'maximumnumber' without the quotes to generate a random number. {prefix}dice will automatically pick a number between 1 and 100.\n");
+                    $"{prefix}dice 'minimumnumber' 'maximumnumber' (without the quotes) to generate a random number. {prefix}dice will automatically pick a number between 1 and 100.\n" +
+                    $"\n\nThis bot also functions as Robot9000. This means that the bot will mute you if you post duplicate content that already has been posted in this server.\n"+
+                    "The amount of time you get muted depends on the amount of punishments you already had.");
 
             });
             p_discord.AddCommand("666", async e =>
@@ -501,6 +508,9 @@ namespace Mivos_Bot
             return false;
 
         }
+
+
+        
     }
 
 }
