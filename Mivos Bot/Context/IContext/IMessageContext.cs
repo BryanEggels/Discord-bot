@@ -11,5 +11,7 @@ namespace Mivos_Bot.Context.IContext
     {
         bool CheckDuplicate(DiscordMessage msg,ulong GuildID);
         bool AddMessage(DiscordMessage msg, ulong GuildID);
+        //deletes all messages from the database!
+        bool ResetMessages();
     }
 }

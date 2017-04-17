@@ -33,6 +33,16 @@ namespace Mivos_Bot.Repository
             return context.GetUser(uid);
         }
 
+        public bool MuteCountreset()
+        {
+            return context.MuteCountreset();
+        }
+
+        public bool MuteReset()
+        {
+            return context.MuteReset();
+        }
+
         public bool MuteUser(DiscordUser user)
         {
             return context.MuteUser(user);
@@ -47,5 +57,6 @@ namespace Mivos_Bot.Repository
         {
             return context.User_exists(user);
         }
+        
     }
 }

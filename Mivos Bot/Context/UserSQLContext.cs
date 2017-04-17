@@ -105,7 +105,54 @@ namespace Mivos_Bot.Context
                 }
             }
         }
-    
+        
+        //resets the mutecount of all users
+        public bool MuteCountreset()
+        {
+            string mute = "UPDATE discorduser SET mutecount = 0";
+            try
+            {
+                using (SqlConnection con = Database.Connection)
+                {
+                    SqlCommand cmd = new SqlCommand(mute, con);
+
+                    if (cmd.ExecuteNonQuery() >= 1) //als er meer dan 1 row affected is wordt dit true
+                    {
+                        return true;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return false;
+            }
+            return false;
+        }
+
+        public bool MuteReset()
+        {
+            string mute = "UPDATE discorduser SET Mute_Expired = @date WHERE Mute_Expired > @date";
+            try
+            {
+                using (SqlConnection con = Database.Connection)
+                {
+                    SqlCommand cmd = new SqlCommand(mute, con);
+                    cmd.Parameters.AddWithValue("@date", DateTime.Now);
+                    if (cmd.ExecuteNonQuery() >= 1) //als er meer dan 1 row affected is wordt dit true
+                    {
+                        return true;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return false;
+            }
+            return false;
+        }
+
         //executed if a message is duplicate
         public bool MuteUser(DiscordUser User)
         {
@@ -144,7 +191,7 @@ namespace Mivos_Bot.Context
                 {
                     SqlCommand cmd = new SqlCommand(unmute, con);
                     cmd.Parameters.AddWithValue("@uid", uid.ToString());
-                    cmd.Parameters.AddWithValue("@data", DateTime.Now);
+                    cmd.Parameters.AddWithValue("@date", DateTime.Now);
 
                     if (cmd.ExecuteNonQuery() == 1) //als er meer dan 1 row affected is wordt dit true
                     {
@@ -160,6 +207,7 @@ namespace Mivos_Bot.Context
             return false;
         }
 
+        //checks if the askeduser exists
         public bool User_exists(DiscordUser user)
         {
             using (SqlConnection con = Database.Connection)

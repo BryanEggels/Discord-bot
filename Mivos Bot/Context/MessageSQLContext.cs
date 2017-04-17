@@ -79,5 +79,29 @@ namespace Mivos_Bot.Context
                 return false;
             }
         }
+
+        public bool ResetMessages()
+        {
+            try
+            {
+                using (SqlConnection con = Database.Connection)
+                {
+                    
+                    string resetmsg = "DELETE FROM discordmessage";
+                    SqlCommand cmd = new SqlCommand(resetmsg, con);
+                    
+                    if (cmd.ExecuteNonQuery() >= 1) //als er meer dan 1 row affected is wordt dit true
+                    {
+                        return true;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return false;
+            }
+            return false;
+        }
     }
 }

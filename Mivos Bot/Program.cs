@@ -52,23 +52,31 @@ namespace Mivos_Bot
                 discord.MessageCreated += async (e) => //triggered when a new message comes in
                 {
                     
-                    if (!e.Message.Author.IsBot && !e.Message.Content.StartsWith("!")) //filter the bots
+                    if (!e.Message.Author.IsBot ) //filter the bots
                     {
                         if (userrepo.GetMuted().Any(User => User.uid == e.Author.ID)) //see if the messageauthor is currently muted
                         {
                             await e.Message.Delete();
 
                         }
-                        else if (messagerepo.CheckDuplicate(e.Message, e.Guild.ID) && !e.Message.Author.IsBot) //check if the message is a duplicate
+                        else if (messagerepo.CheckDuplicate(e.Message, e.Guild.ID) && !Containscommand(e.Message.Content.Split(' '))) //check if the message is a duplicate
                         {
                             userrepo.MuteUser(e.Message.Author);
                             User muteduser = userrepo.GetUser(e.Author.ID);
-                            await e.Message.Respond($"{e.Message.Author.Username} has been muted untill {muteduser.Mute_Expired}, this is mute number {muteduser.Mutecount}!");
-                            await e.Message.Delete();
+                            await e.Message.Respond($"\"{e.Message.Content}\" is duplicate content!\n{e.Message.Author.Username} has been muted untill {muteduser.Mute_Expired}, this is mute number {muteduser.Mutecount}!");
                         }
                         await Task.Delay(0);
                     }
                    
+                };
+                discord.PresenceUpdate += async (e) => //still testing
+                {
+                    
+                    DiscordGuild guild = await discord.GetGuild(e.GuildID);
+                    List<DiscordChannel> channels = await guild.GetChannels();
+                    await channels[0].SendMessage($"Welcome! <@{e.User.ID}>");
+                    
+                    await Task.Delay(0);
                 };
                 addcommands(discord);
 
@@ -88,7 +96,8 @@ namespace Mivos_Bot
                 Prefix = "!",
                 SelfBot = false,
             });
-            
+            UserRepository userrepo = new UserRepository(new UserSQLContext());
+            MessageRepository msgrepo = new MessageRepository(new MessageSQLContext());
             p_discord.AddCommand("hello", async e =>
             {
                 string[] msg = e.Message.Content.Split(' ');
@@ -322,7 +331,6 @@ namespace Mivos_Bot
                 }
                 else
                 {
-
                     await e.Message.Respond("Please use 2 parameters divided by a space");
                 }
 
@@ -338,7 +346,6 @@ namespace Mivos_Bot
                         {
                             new UserRepository(new UserSQLContext()).Unmute(user.ID);
                             await e.Message.Respond($"{e.Message.Author.Username } unmuted <@{user.ID}> ");
-
                         }
                     }
                     else
@@ -350,10 +357,45 @@ namespace Mivos_Bot
                 {
                     await e.Message.Respond($"You ar not permitted to unmute users!");
                 }
-
-                
-                
-
+            });
+            p_discord.AddCommand("mutereset", async e =>
+            {
+                if (e.Message.Author.ID == 261216517910167554 || e.Message.Author.ID == 239471183475638272)
+                {
+                    
+                    if(userrepo.MuteCountreset())
+                    {
+                        userrepo.MuteReset();
+                        await e.Message.Respond("Robot9000 mutes have been reset!");
+                    }
+                    else
+                    {
+                        await e.Message.Respond("Oops! looks like something went wrong. Please contact Mivo90");
+                    }
+                }
+                else
+                {
+                    await e.Message.Respond("I'm sorry, I can not let you do that.");
+                }
+            });
+            p_discord.AddCommand("messagereset", async e =>
+            {
+                if(e.Message.Author.ID == 261216517910167554 || e.Message.Author.ID == 239471183475638272)
+                {
+                    if (msgrepo.ResetMessages())
+                    {
+                        await e.Message.Respond("Robot9000 messages have been reset!");
+                    }
+                    else
+                    {
+                        await e.Message.Respond("Oops, couldn't reset the messages. Please contact Mivo90");
+                    }
+                    
+                }
+                else
+                {
+                    await e.Message.Respond("Nice try.");
+                }
             });
 
         }
@@ -426,6 +468,38 @@ namespace Mivos_Bot
             {
                 return from;
             }
+        }
+        public static bool Containscommand(string[] message)
+        {
+            if (message[0].StartsWith("!"))
+            {
+                message[0] = message[0].TrimStart('!');
+                List<string> commands = new List<string>();
+                commands.Add("help");
+                commands.Add("dice");
+                commands.Add("join");
+                commands.Add("dc");
+                commands.Add("god");
+                commands.Add("kkk");
+                commands.Add("hello");
+                commands.Add("666");
+                commands.Add("blm");
+                commands.Add("play");
+                commands.Add("karma");
+                commands.Add("leaderboard");
+                commands.Add("lb");
+                commands.Add("unmute");
+                commands.Add("mutereset");
+                commands.Add("messagereset");
+
+
+                foreach (string command in commands)
+                {
+                    if (command == message[0]) { return true; }
+                }
+            }
+            return false;
+
         }
     }
 

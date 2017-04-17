@@ -25,5 +25,10 @@ namespace Mivos_Bot.Repository
         {
             return context.CheckDuplicate(msg, GuildID);
         }
+
+        public bool ResetMessages()
+        {
+            return context.ResetMessages();
+        }
     }
 }
