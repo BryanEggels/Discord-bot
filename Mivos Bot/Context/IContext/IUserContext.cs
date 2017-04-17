@@ -15,5 +15,6 @@ namespace Mivos_Bot.Context.IContext
         bool User_exists(DiscordUser user);
         List<User> GetMuted();
         User GetUser(ulong uid);
+        bool Unmute(ulong uid);
     }
 }

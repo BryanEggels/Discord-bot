@@ -106,7 +106,8 @@ namespace Mivos_Bot.Context
 
         public bool MuteUser(DiscordUser User)
         {
-            string mute = "UPDATE discorduser SET mutecount = mutecount + 1, Mute_Expired = current_timestamp + POWER(2, mutecount) WHERE UID = @uid";
+            
+            string mute = "UPDATE discorduser SET mutecount = mutecount + 1,Mute_Expired = DATEADD(ss, POWER(2, mutecount), GETDATE()) WHERE UID = @uid";
 
             try
             {
@@ -128,6 +129,33 @@ namespace Mivos_Bot.Context
             }
             return false;
         }
+
+        public bool Unmute(ulong uid)
+        {
+            string unmute = "UPDATE discorduser SET Mute_Expired = @date WHERE UID = @uid";
+
+            try
+            {
+                using (SqlConnection con = Database.Connection)
+                {
+                    SqlCommand cmd = new SqlCommand(unmute, con);
+                    cmd.Parameters.AddWithValue("@uid", uid.ToString());
+                    cmd.Parameters.AddWithValue("@data", DateTime.Now);
+
+                    if (cmd.ExecuteNonQuery() == 1) //als er meer dan 1 row affected is wordt dit true
+                    {
+                        return true;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return false;
+            }
+            return false;
+        }
+
         public bool User_exists(DiscordUser user)
         {
             using (SqlConnection con = Database.Connection)

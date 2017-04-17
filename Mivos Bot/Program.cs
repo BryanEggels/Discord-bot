@@ -18,7 +18,7 @@ namespace Mivos_Bot
     {
         private static VoiceNextClient VoiceService { get; set; }
 
-
+        
         static void Main(string[] args)
         {
             
@@ -30,6 +30,7 @@ namespace Mivos_Bot
         {
             MessageRepository messagerepo = new MessageRepository(new MessageSQLContext());
             UserRepository userrepo = new UserRepository(new UserSQLContext());
+            List < Command > commandlist = new List<Command>();
             try
             {
                 var discord = new DiscordClient(new DiscordConfig
@@ -50,7 +51,8 @@ namespace Mivos_Bot
 
                 discord.MessageCreated += async (e) => //triggered when a new message comes in
                 {
-                    if (!e.Message.Author.IsBot) //filter the bots
+                    
+                    if (!e.Message.Author.IsBot && !e.Message.Content.StartsWith("!")) //filter the bots
                     {
                         if (userrepo.GetMuted().Any(User => User.uid == e.Author.ID)) //see if the messageauthor is currently muted
                         {
@@ -86,6 +88,7 @@ namespace Mivos_Bot
                 Prefix = "!",
                 SelfBot = false,
             });
+            
             p_discord.AddCommand("hello", async e =>
             {
                 string[] msg = e.Message.Content.Split(' ');
@@ -323,6 +326,36 @@ namespace Mivos_Bot
                 }
 
             });
+            p_discord.AddCommand("unmute", async e =>
+            {
+                await Task.Delay(0);
+                if(e.Message.Author.ID == 261216517910167554 || e.Message.Author.ID == 239471183475638272)
+                {
+                    if (e.Message.Mentions.Count > 0)
+                    {
+                        foreach (DiscordUser user in e.Message.Mentions)
+                        {
+                            new UserRepository(new UserSQLContext()).Unmute(user.ID);
+                            await e.Message.Respond($"{e.Message.Author.Username } unmuted <@{user.ID}> ");
+
+                        }
+                    }
+                    else
+                    {
+                        await e.Message.Respond($"Please mention the user(s) you want to unmute!");
+                    }
+                }
+                else
+                {
+                    await e.Message.Respond($"You ar not permitted to unmute users!");
+                }
+
+                
+                
+
+            });
+
+
         }
         public static Boolean Operator(string logic, double x, double y)
         {

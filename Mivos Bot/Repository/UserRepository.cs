@@ -35,6 +35,12 @@ namespace Mivos_Bot.Repository
         {
             return context.MuteUser(user);
         }
+
+        public bool Unmute(ulong uid)
+        {
+            return context.Unmute(uid);
+        }
+
         public bool User_exists(DiscordUser user)
         {
             return context.User_exists(user);
