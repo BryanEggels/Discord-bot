@@ -415,10 +415,19 @@ namespace Mivos_Bot
         public static int Dice(int from, int to)
         {
             Random r = new Random();
-            return r.Next(from, to + 1);
+            if (from > to)
+            {
+                return r.Next(to, from + 1);
+            }
+            else if(to > from)
+            {
+                return r.Next(from, to + 1);
+            }
+            else
+            {
+                return from;
+            }
         }
-
-        
     }
 
 }
