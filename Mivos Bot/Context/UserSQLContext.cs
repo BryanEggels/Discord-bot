@@ -12,6 +12,7 @@ namespace Mivos_Bot.Context
 {
     class UserSQLContext : IUserContext
     {
+        //adds a user to my database
         public bool AddUser(DiscordUser user)
         {
             try
@@ -38,6 +39,7 @@ namespace Mivos_Bot.Context
             return false;
         }
 
+        //gets all muted users and returns a list of my self made user object
         public List<User> GetMuted()
         {
             using (SqlConnection con = Database.Connection)
@@ -68,6 +70,7 @@ namespace Mivos_Bot.Context
             }
         }
 
+        //gets the user from the database and returns my self made user object
         public User GetUser(ulong uid)
         {
             using (SqlConnection con = Database.Connection)
@@ -103,7 +106,7 @@ namespace Mivos_Bot.Context
             }
         }
     
-
+        //executed if a message is duplicate
         public bool MuteUser(DiscordUser User)
         {
             
@@ -130,6 +133,7 @@ namespace Mivos_Bot.Context
             return false;
         }
 
+        //sets the mute_expired from the user to datetime.now()
         public bool Unmute(ulong uid)
         {
             string unmute = "UPDATE discorduser SET Mute_Expired = @date WHERE UID = @uid";
@@ -184,7 +188,6 @@ namespace Mivos_Bot.Context
                 }
             }
         }
-
 
     }
 }
