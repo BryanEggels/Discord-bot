@@ -60,15 +60,17 @@ namespace Mivos_Bot
                             await e.Message.Delete();
 
                         }
+                         
                         else if (messagerepo.CheckDuplicate(e.Message, e.Guild.ID) && !Containscommand(e.Message.Content.Split(' '))) //check if the message is a duplicate
                         {
+                            
                             userrepo.MuteUser(e.Message.Author);
                             User muteduser = userrepo.GetUser(e.Author.ID);
                             await e.Message.Respond($"\"{e.Message.Content}\" is duplicate content!\n{e.Message.Author.Username} has been muted untill {muteduser.Mute_Expired}, this is mute number {muteduser.Mutecount}!");
                         }
                         await Task.Delay(0);
                     }
-                   
+                    Console.WriteLine(e.Guild.ID.ToString());
                 };
                 
 
@@ -121,7 +123,6 @@ namespace Mivos_Bot
                         {
                             if (dm.User.Username.ToUpper() == msg[1].ToUpper())
                             {
-
                                 ChannelContainsUser = true;
                                 await e.Message.Respond($"{e.Message.Author.Username } says hello to <@{dm.User.ID}> ");
                                 break;

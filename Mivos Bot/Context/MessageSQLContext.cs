@@ -8,7 +8,7 @@ using Mivos_Bot.Context.IContext;
 using System.Data.SqlClient;
 using Mivos_Bot.Context;
 using Mivos_Bot.Repository;
-
+using System.Security.Cryptography;
 
 namespace Mivos_Bot.Context
 {
@@ -29,7 +29,7 @@ namespace Mivos_Bot.Context
                     SqlCommand cmd = new SqlCommand(addmsg, con);
                     cmd.Parameters.AddWithValue("@msgid", msg.ID.ToString());
                     cmd.Parameters.AddWithValue("@uid", msg.Author.ID.ToString());
-                    cmd.Parameters.AddWithValue("@msghash", msg.Content);
+                    cmd.Parameters.AddWithValue("@msghash", ConvertToMD5(msg.Content.ToUpper()));
                     cmd.Parameters.AddWithValue("@gid", GuildID.ToString());
                     cmd.Parameters.AddWithValue("@time", DateTime.Now);
                     if (cmd.ExecuteNonQuery() == 1) //als er meer dan 1 row affected is wordt dit true
@@ -56,7 +56,8 @@ namespace Mivos_Bot.Context
                 string checkmsg = "SELECT * FROM discordmessage WHERE MessageHash = @msghash AND GuildID = @gid";
                 SqlCommand cmd = new SqlCommand(checkmsg, con);
 
-                cmd.Parameters.AddWithValue("@msghash", msg.Content);
+                //cmd.Parameters.AddWithValue("@msghash", ConvertToMD5(msg.Content.ToUpper()));
+                cmd.Parameters.AddWithValue("@msghash", ConvertToMD5(msg.Content.ToUpper()));
                 cmd.Parameters.AddWithValue("@gid", GuildID.ToString());
                 try
                 {
@@ -102,6 +103,34 @@ namespace Mivos_Bot.Context
                 return false;
             }
             return false;
+        }
+        public static string ConvertToMD5(string woord)
+        {
+            MD5 md5 = MD5.Create();
+            byte[] inputbytes = System.Text.Encoding.ASCII.GetBytes(woord);
+            byte[] hash = md5.ComputeHash(inputbytes);
+
+            StringBuilder sb = new StringBuilder();
+
+            foreach (byte b in hash)
+            {
+                sb.Append(b.ToString("X2"));
+            }
+            return sb.ToString();
+        }
+        public static bool MD5Check(string woord, string hash)
+        {
+            MD5 md5 = MD5.Create();
+            byte[] inputbytes = System.Text.Encoding.ASCII.GetBytes(woord);
+            byte[] hash2 = md5.ComputeHash(inputbytes);
+
+            StringBuilder sb = new StringBuilder();
+
+            foreach (byte b in hash2)
+            {
+                sb.Append(b.ToString("X2"));
+            }
+            return sb.ToString() == hash;
         }
     }
 }
