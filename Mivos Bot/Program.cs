@@ -30,7 +30,7 @@ namespace Mivos_Bot
         {
             MessageRepository messagerepo = new MessageRepository(new MessageSQLContext());
             UserRepository userrepo = new UserRepository(new UserSQLContext());
-            List < Command > commandlist = new List<Command>();
+            
             try
             {
                 var discord = new DiscordClient(new DiscordConfig
@@ -355,7 +355,6 @@ namespace Mivos_Bot
                 
 
             });
-
 
         }
         public static Boolean Operator(string logic, double x, double y)
