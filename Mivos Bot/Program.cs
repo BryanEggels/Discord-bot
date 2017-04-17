@@ -251,7 +251,8 @@ namespace Mivos_Bot
             p_discord.AddCommand("help", async e =>
             {
                 string prefix = "!";
-                await e.Message.Respond($"currently available commands are: \n{prefix}hello <username> \n{prefix}reken 'nummer' 'operator' 'nummer' \n{prefix}god to see if you are a c# god\n{prefix}karma @username to give a user karma!\n ");
+                await e.Message.Respond($"currently available commands are: \n{prefix}hello <username> \n{prefix}reken 'nummer' 'operator' 'nummer' \n{prefix}god to see if you are a c# god\n{prefix}karma @username to give a user karma!\n"+
+                    $"{prefix}dice 'minimumnumber' 'maximumnumber' without the quotes to generate a random number. {prefix}dice will automatically pick a number between 1 and 100.\n");
 
             });
             p_discord.AddCommand("666", async e =>
