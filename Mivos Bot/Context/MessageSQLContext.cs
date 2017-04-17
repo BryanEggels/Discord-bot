@@ -14,6 +14,7 @@ namespace Mivos_Bot.Context
 {
     class MessageSQLContext : IMessageContext
     {
+        //if its not a duplicate, AddMessage() will be executed and the unique message will be added to my database
         public bool AddMessage(DiscordMessage msg, ulong GuildID)
         {
             try
@@ -46,6 +47,7 @@ namespace Mivos_Bot.Context
             
         }
 
+        //check for a duplicate message in the current 'guild' a.k.a channel
         public bool CheckDuplicate(DiscordMessage msg, ulong GuildID)
         {
             using (SqlConnection con = Database.Connection)
